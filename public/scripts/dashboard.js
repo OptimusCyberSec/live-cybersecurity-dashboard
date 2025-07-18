@@ -80,6 +80,11 @@ class CyberDashboard {
             threatLevel.className = 'level-value low';
         }
 
+        // Notify threat intelligence system
+        if (window.threatIntelligence) {
+            window.threatIntelligence.updateThreatLevel(enabled);
+        }
+
         // Notify WebSocket about mode change
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({
@@ -221,6 +226,14 @@ class CyberDashboard {
         this.stats.countries.add(attacker.country);
         this.updateAttackersTable();
         this.updateStats({ countries: this.stats.countries.size });
+
+        // Update threat intelligence analytics
+        if (window.threatIntelligence) {
+            window.threatIntelligence.updateAnalyticsFromDashboard({
+                attackers: Array.from(this.attackers.values()),
+                attackMode: this.isAttackMode
+            });
+        }
     }
 
     updateAttackersTable() {

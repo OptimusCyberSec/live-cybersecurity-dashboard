@@ -131,6 +131,27 @@
                 </div>
             </section>
 
+            <!-- Threat Intelligence Report -->
+            <section class="report-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-alt"></i> Threat Intelligence Report</h2>
+                    <div class="report-controls">
+                        <button class="btn-small" id="generateReport">
+                            <i class="fas fa-sync"></i> Generate
+                        </button>
+                        <button class="btn-small" id="exportReport">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+                <div class="report-container" id="threatReport">
+                    <div class="report-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Generating threat intelligence report...</p>
+                    </div>
+                </div>
+            </section>
+
             <!-- Top Attackers Table -->
             <section class="table-section">
                 <div class="section-header">
@@ -163,6 +184,38 @@
                     </table>
                 </div>
             </section>
+
+            <!-- Advanced Analytics Section -->
+            <section class="analytics-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-pie"></i> Advanced Analytics</h2>
+                    <div class="analytics-controls">
+                        <select id="analyticsTimeframe">
+                            <option value="24h">Last 24 Hours</option>
+                            <option value="7d">Last 7 Days</option>
+                            <option value="30d">Last 30 Days</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h4>Attack Vector Distribution</h4>
+                        <canvas id="attackVectorChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Geographic Heat Index</h4>
+                        <div id="geoHeatIndex" class="heat-index-container"></div>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Temporal Attack Patterns</h4>
+                        <canvas id="temporalChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Risk Assessment Matrix</h4>
+                        <div id="riskMatrix" class="risk-matrix-container"></div>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <!-- Alert Modal -->
@@ -186,6 +239,7 @@
     <script src="scripts/dashboard.js"></script>
     <script src="scripts/map.js"></script>
     <script src="scripts/charts.js"></script>
+    <script src="scripts/threat-intelligence.js"></script>
     <script src="scripts/websocket.js"></script>
 </body>
 </html>
