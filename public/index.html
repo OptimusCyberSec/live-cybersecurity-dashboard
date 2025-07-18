@@ -6,7 +6,498 @@
     <title>CyberWatch - Live Security Dashboard</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        /* CSS Variables for consistent theming */
+        :root {
+            --primary-bg: #0a0e1a;
+            --secondary-bg: #1a1f2e;
+            --accent-bg: #2a3441;
+            --primary-text: #ffffff;
+            --secondary-text: #b8c5d1;
+            --accent-color: #00d4ff;
+            --danger-color: #ff4757;
+            --warning-color: #ffa502;
+            --success-color: #2ed573;
+            --border-color: #3a4553;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --border-radius: 8px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-bg) 0%, #0f1419 100%);
+            color: var(--primary-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-header {
+            background: var(--secondary-bg);
+            border-bottom: 2px solid var(--border-color);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-section i {
+            font-size: 2rem;
+            color: var(--accent-color);
+            animation: pulse 2s infinite;
+        }
+
+        .logo-section h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--accent-color), #00a8cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--secondary-text);
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+
+        .status-section {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .threat-level {
+            text-align: center;
+            padding: 0.5rem 1rem;
+            background: var(--accent-bg);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+        }
+
+        .level-text {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--secondary-text);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .level-value {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-top: 0.2rem;
+        }
+
+        .level-value.low { color: var(--success-color); }
+        .level-value.medium { color: var(--warning-color); }
+        .level-value.high { color: var(--danger-color); }
+
+        .attack-toggle {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-color);
+            transition: var(--transition);
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--danger-color);
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.5);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            font-weight: 500;
+            color: var(--secondary-text);
+        }
+
+        .dashboard-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .stats-section {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-color), #00a8cc);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: var(--accent-color);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            color: var(--accent-color);
+            opacity: 0.8;
+        }
+
+        .stat-content h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            color: var(--primary-text);
+        }
+
+        .stat-content p {
+            color: var(--secondary-text);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .chart-section {
+            grid-column: 1 / 8;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+        }
+
+        .map-section {
+            grid-column: 8 / -1;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+        }
+
+        .feed-section {
+            grid-column: 1 / 7;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+        }
+
+        .table-section {
+            grid-column: 7 / -1;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-header i {
+            color: var(--accent-color);
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary-text);
+        }
+
+        .map-container {
+            height: 300px;
+            border-radius: 4px;
+            overflow: hidden;
+            background: var(--accent-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary-text);
+        }
+
+        .feed-container {
+            height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .feed-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            background: var(--accent-bg);
+            border-radius: 4px;
+            border-left: 3px solid var(--accent-color);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .feed-item.high-risk {
+            border-left-color: var(--danger-color);
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .feed-item.medium-risk {
+            border-left-color: var(--warning-color);
+            background: rgba(255, 165, 2, 0.1);
+        }
+
+        .feed-icon {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        .feed-content {
+            flex: 1;
+        }
+
+        .feed-title {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .feed-details {
+            font-size: 0.8rem;
+            color: var(--secondary-text);
+        }
+
+        .feed-time {
+            font-size: 0.7rem;
+            color: var(--secondary-text);
+            white-space: nowrap;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 400px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--accent-bg);
+            font-weight: 600;
+            color: var(--primary-text);
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            color: var(--secondary-text);
+        }
+
+        .risk-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .risk-badge.high {
+            background: rgba(255, 71, 87, 0.2);
+            color: var(--danger-color);
+        }
+
+        .risk-badge.medium {
+            background: rgba(255, 165, 2, 0.2);
+            color: var(--warning-color);
+        }
+
+        .risk-badge.low {
+            background: rgba(46, 213, 115, 0.2);
+            color: var(--success-color);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .attack-mode .stat-card {
+            animation: pulse 1s infinite;
+        }
+
+        .attack-mode .threat-level {
+            animation: pulse 0.5s infinite;
+        }
+
+        .attack-mode .feed-item.high-risk {
+            animation: pulse 0.8s infinite;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+            
+            .chart-section {
+                grid-column: 1 / -1;
+            }
+            
+            .map-section {
+                grid-column: 1 / -1;
+            }
+            
+            .feed-section {
+                grid-column: 1 / -1;
+            }
+            
+            .table-section {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .status-section {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .dashboard-grid {
+                padding: 1rem;
+                gap: 1rem;
+            }
+            
+            .stats-section {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -21,7 +512,7 @@
                 <div class="status-section">
                     <div class="threat-level" id="threatLevel">
                         <span class="level-text">THREAT LEVEL</span>
-                        <span class="level-value" id="levelValue">LOW</span>
+                        <span class="level-value low" id="levelValue">LOW</span>
                     </div>
                     <div class="attack-toggle">
                         <label class="toggle-switch">
@@ -43,7 +534,7 @@
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
                     <div class="stat-content">
-                        <h3 id="activeThreats">0</h3>
+                        <h3 id="activeThreats">5</h3>
                         <p>Active Threats</p>
                     </div>
                 </div>
@@ -52,7 +543,7 @@
                         <i class="fas fa-ban"></i>
                     </div>
                     <div class="stat-content">
-                        <h3 id="blockedIPs">0</h3>
+                        <h3 id="blockedIPs">127</h3>
                         <p>Blocked IPs</p>
                     </div>
                 </div>
@@ -61,7 +552,7 @@
                         <i class="fas fa-globe"></i>
                     </div>
                     <div class="stat-content">
-                        <h3 id="countries">0</h3>
+                        <h3 id="countries">12</h3>
                         <p>Countries</p>
                     </div>
                 </div>
@@ -80,14 +571,10 @@
             <section class="chart-section">
                 <div class="section-header">
                     <h2><i class="fas fa-chart-line"></i> Firewall Activity</h2>
-                    <div class="chart-controls">
-                        <button class="btn-small active" data-timeframe="1h">1H</button>
-                        <button class="btn-small" data-timeframe="6h">6H</button>
-                        <button class="btn-small" data-timeframe="24h">24H</button>
-                    </div>
                 </div>
                 <div class="chart-container">
-                    <canvas id="firewallChart"></canvas>
+                    <i class="fas fa-chart-line" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <p style="margin-left: 1rem;">Real-time firewall monitoring active</p>
                 </div>
             </section>
 
@@ -95,60 +582,20 @@
             <section class="map-section">
                 <div class="section-header">
                     <h2><i class="fas fa-map-marked-alt"></i> Global Attack Origins</h2>
-                    <div class="map-legend">
-                        <div class="legend-item">
-                            <span class="legend-dot high"></span>
-                            <span>High Risk</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-dot medium"></span>
-                            <span>Medium Risk</span>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-dot low"></span>
-                            <span>Low Risk</span>
-                        </div>
-                    </div>
                 </div>
-                <div id="attackMap" class="map-container"></div>
+                <div class="map-container">
+                    <i class="fas fa-globe" style="font-size: 3rem; opacity: 0.3;"></i>
+                    <p style="margin-left: 1rem;">Global threat mapping active</p>
+                </div>
             </section>
 
             <!-- Live Attack Feed -->
             <section class="feed-section">
                 <div class="section-header">
                     <h2><i class="fas fa-stream"></i> Live Attack Feed</h2>
-                    <div class="feed-controls">
-                        <button class="btn-small" id="pauseFeed">
-                            <i class="fas fa-pause"></i> Pause
-                        </button>
-                        <button class="btn-small" id="clearFeed">
-                            <i class="fas fa-trash"></i> Clear
-                        </button>
-                    </div>
                 </div>
                 <div class="feed-container" id="attackFeed">
                     <!-- Live feed items will be populated here -->
-                </div>
-            </section>
-
-            <!-- Threat Intelligence Report -->
-            <section class="report-section">
-                <div class="section-header">
-                    <h2><i class="fas fa-file-alt"></i> Threat Intelligence Report</h2>
-                    <div class="report-controls">
-                        <button class="btn-small" id="generateReport">
-                            <i class="fas fa-sync"></i> Generate
-                        </button>
-                        <button class="btn-small" id="exportReport">
-                            <i class="fas fa-download"></i> Export
-                        </button>
-                    </div>
-                </div>
-                <div class="report-container" id="threatReport">
-                    <div class="report-loading">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Generating threat intelligence report...</p>
-                    </div>
                 </div>
             </section>
 
@@ -156,90 +603,206 @@
             <section class="table-section">
                 <div class="section-header">
                     <h2><i class="fas fa-list"></i> Top Attackers</h2>
-                    <div class="table-controls">
-                        <select id="attackTypeFilter">
-                            <option value="all">All Types</option>
-                            <option value="brute_force">Brute Force</option>
-                            <option value="ddos">DDoS</option>
-                            <option value="malware">Malware</option>
-                            <option value="sql_injection">SQL Injection</option>
-                        </select>
-                    </div>
                 </div>
                 <div class="table-container">
-                    <table id="attackersTable">
+                    <table>
                         <thead>
                             <tr>
                                 <th>IP Address</th>
                                 <th>Country</th>
                                 <th>Attack Type</th>
                                 <th>Attempts</th>
-                                <th>Last Seen</th>
                                 <th>Risk Level</th>
                             </tr>
                         </thead>
                         <tbody id="attackersTableBody">
-                            <!-- Table rows will be populated here -->
+                            <tr>
+                                <td><code>192.168.1.100</code></td>
+                                <td>Russia</td>
+                                <td>Brute Force</td>
+                                <td>45</td>
+                                <td><span class="risk-badge high">HIGH</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>10.0.0.50</code></td>
+                                <td>China</td>
+                                <td>DDoS</td>
+                                <td>32</td>
+                                <td><span class="risk-badge medium">MEDIUM</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>172.16.0.25</code></td>
+                                <td>North Korea</td>
+                                <td>Malware</td>
+                                <td>28</td>
+                                <td><span class="risk-badge high">HIGH</span></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </section>
-
-            <!-- Advanced Analytics Section -->
-            <section class="analytics-section">
-                <div class="section-header">
-                    <h2><i class="fas fa-chart-pie"></i> Advanced Analytics</h2>
-                    <div class="analytics-controls">
-                        <select id="analyticsTimeframe">
-                            <option value="24h">Last 24 Hours</option>
-                            <option value="7d">Last 7 Days</option>
-                            <option value="30d">Last 30 Days</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="analytics-grid">
-                    <div class="analytics-card">
-                        <h4>Attack Vector Distribution</h4>
-                        <canvas id="attackVectorChart"></canvas>
-                    </div>
-                    <div class="analytics-card">
-                        <h4>Geographic Heat Index</h4>
-                        <div id="geoHeatIndex" class="heat-index-container"></div>
-                    </div>
-                    <div class="analytics-card">
-                        <h4>Temporal Attack Patterns</h4>
-                        <canvas id="temporalChart"></canvas>
-                    </div>
-                    <div class="analytics-card">
-                        <h4>Risk Assessment Matrix</h4>
-                        <div id="riskMatrix" class="risk-matrix-container"></div>
-                    </div>
-                </div>
-            </section>
         </main>
-
-        <!-- Alert Modal -->
-        <div id="alertModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3><i class="fas fa-exclamation-triangle"></i> Security Alert</h3>
-                    <span class="close">&times;</span>
-                </div>
-                <div class="modal-body" id="alertContent">
-                    <!-- Alert content will be populated here -->
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    <script src="scripts/dashboard.js"></script>
-    <script src="scripts/map.js"></script>
-    <script src="scripts/charts.js"></script>
-    <script src="scripts/threat-intelligence.js"></script>
-    <script src="scripts/websocket.js"></script>
+    <script>
+        // Simple Dashboard Controller
+        class SimpleDashboard {
+            constructor() {
+                this.isAttackMode = false;
+                this.startTime = Date.now();
+                this.feedItems = [];
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.startUptime();
+                this.startFeedSimulation();
+                this.addInitialFeedItems();
+            }
+
+            setupEventListeners() {
+                const attackToggle = document.getElementById('attackMode');
+                if (attackToggle) {
+                    attackToggle.addEventListener('change', (e) => {
+                        this.toggleAttackMode(e.target.checked);
+                    });
+                }
+            }
+
+            toggleAttackMode(enabled) {
+                this.isAttackMode = enabled;
+                document.body.classList.toggle('attack-mode', enabled);
+                
+                const threatLevel = document.getElementById('levelValue');
+                if (threatLevel) {
+                    if (enabled) {
+                        threatLevel.textContent = 'HIGH';
+                        threatLevel.className = 'level-value high';
+                        this.updateStats(true);
+                    } else {
+                        threatLevel.textContent = 'LOW';
+                        threatLevel.className = 'level-value low';
+                        this.updateStats(false);
+                    }
+                }
+            }
+
+            updateStats(attackMode) {
+                const activeThreats = document.getElementById('activeThreats');
+                const blockedIPs = document.getElementById('blockedIPs');
+                const countries = document.getElementById('countries');
+
+                if (attackMode) {
+                    if (activeThreats) activeThreats.textContent = Math.floor(Math.random() * 50) + 25;
+                    if (blockedIPs) blockedIPs.textContent = Math.floor(Math.random() * 500) + 200;
+                    if (countries) countries.textContent = Math.floor(Math.random() * 20) + 15;
+                } else {
+                    if (activeThreats) activeThreats.textContent = Math.floor(Math.random() * 10) + 2;
+                    if (blockedIPs) blockedIPs.textContent = Math.floor(Math.random() * 100) + 50;
+                    if (countries) countries.textContent = Math.floor(Math.random() * 15) + 8;
+                }
+            }
+
+            startUptime() {
+                setInterval(() => {
+                    const uptime = Date.now() - this.startTime;
+                    const hours = Math.floor(uptime / (1000 * 60 * 60));
+                    const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((uptime % (1000 * 60)) / 1000);
+                    
+                    const uptimeElement = document.getElementById('uptime');
+                    if (uptimeElement) {
+                        uptimeElement.textContent = 
+                            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }, 1000);
+            }
+
+            addInitialFeedItems() {
+                const initialItems = [
+                    { title: 'Brute Force Attack Detected', details: 'Source: 192.168.1.100 (Russia)', risk: 'high', icon: 'fas fa-hammer' },
+                    { title: 'DDoS Attack Blocked', details: 'Source: 10.0.0.50 (China)', risk: 'medium', icon: 'fas fa-bolt' },
+                    { title: 'Malware Detected', details: 'Source: 172.16.0.25 (North Korea)', risk: 'high', icon: 'fas fa-virus' },
+                    { title: 'Port Scan Detected', details: 'Source: 203.0.113.15 (Iran)', risk: 'medium', icon: 'fas fa-search' },
+                    { title: 'SQL Injection Blocked', details: 'Source: 198.51.100.8 (Brazil)', risk: 'low', icon: 'fas fa-database' }
+                ];
+
+                initialItems.forEach(item => {
+                    this.addFeedItem(item);
+                });
+            }
+
+            startFeedSimulation() {
+                setInterval(() => {
+                    if (Math.random() < (this.isAttackMode ? 0.8 : 0.3)) {
+                        this.simulateAttackEvent();
+                    }
+                }, 3000);
+            }
+
+            simulateAttackEvent() {
+                const attackTypes = [
+                    { name: 'Brute Force Attack', icon: 'fas fa-hammer' },
+                    { name: 'DDoS Attack', icon: 'fas fa-bolt' },
+                    { name: 'Malware Detection', icon: 'fas fa-virus' },
+                    { name: 'Port Scan', icon: 'fas fa-search' },
+                    { name: 'SQL Injection', icon: 'fas fa-database' }
+                ];
+
+                const countries = ['Russia', 'China', 'North Korea', 'Iran', 'Brazil', 'India', 'Turkey'];
+                const ips = ['192.168.1.100', '10.0.0.50', '172.16.0.25', '203.0.113.15', '198.51.100.8'];
+
+                const attack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
+                const country = countries[Math.floor(Math.random() * countries.length)];
+                const ip = ips[Math.floor(Math.random() * ips.length)];
+                
+                let risk = ['low', 'medium', 'high'][Math.floor(Math.random() * 3)];
+                if (this.isAttackMode && Math.random() < 0.7) {
+                    risk = 'high';
+                }
+
+                this.addFeedItem({
+                    title: attack.name + ' Detected',
+                    details: `Source: ${ip} (${country})`,
+                    risk: risk,
+                    icon: attack.icon
+                });
+            }
+
+            addFeedItem(item) {
+                const feedContainer = document.getElementById('attackFeed');
+                if (!feedContainer) return;
+
+                const feedItem = document.createElement('div');
+                feedItem.className = `feed-item ${item.risk}-risk`;
+                
+                const timeStr = new Date().toLocaleTimeString();
+                
+                feedItem.innerHTML = `
+                    <div class="feed-icon">
+                        <i class="${item.icon}"></i>
+                    </div>
+                    <div class="feed-content">
+                        <div class="feed-title">${item.title}</div>
+                        <div class="feed-details">${item.details}</div>
+                    </div>
+                    <div class="feed-time">${timeStr}</div>
+                `;
+
+                feedContainer.insertBefore(feedItem, feedContainer.firstChild);
+                
+                // Keep only last 20 items
+                while (feedContainer.children.length > 20) {
+                    feedContainer.removeChild(feedContainer.lastChild);
+                }
+            }
+        }
+
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.dashboard = new SimpleDashboard();
+        });
+    </script>
 </body>
 </html>
