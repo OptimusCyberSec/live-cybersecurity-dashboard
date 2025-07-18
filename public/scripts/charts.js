@@ -16,6 +16,7 @@ class ChartManager {
 
     initializeFirewallChart() {
         const ctx = document.getElementById('firewallChart').getContext('2d');
+        if (!ctx) return;
         
         // Generate initial data
         const now = new Date();
@@ -235,6 +236,7 @@ class ChartManager {
     // Method to create additional charts if needed
     createThreatChart(canvasId) {
         const ctx = document.getElementById(canvasId).getContext('2d');
+        if (!ctx) return null;
         
         return new Chart(ctx, {
             type: 'doughnut',

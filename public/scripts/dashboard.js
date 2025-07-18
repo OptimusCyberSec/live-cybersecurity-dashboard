@@ -19,25 +19,32 @@ class CyberDashboard {
     init() {
         this.setupEventListeners();
         this.startUptime();
-        this.initializeWebSocket();
         this.loadInitialData();
     }
 
     setupEventListeners() {
         // Attack mode toggle
         const attackToggle = document.getElementById('attackMode');
-        attackToggle.addEventListener('change', (e) => {
-            this.toggleAttackMode(e.target.checked);
-        });
+        if (attackToggle) {
+            attackToggle.addEventListener('change', (e) => {
+                this.toggleAttackMode(e.target.checked);
+            });
+        }
 
         // Feed controls
-        document.getElementById('pauseFeed').addEventListener('click', () => {
-            this.toggleFeedPause();
-        });
+        const pauseFeed = document.getElementById('pauseFeed');
+        if (pauseFeed) {
+            pauseFeed.addEventListener('click', () => {
+                this.toggleFeedPause();
+            });
+        }
 
-        document.getElementById('clearFeed').addEventListener('click', () => {
-            this.clearFeed();
-        });
+        const clearFeed = document.getElementById('clearFeed');
+        if (clearFeed) {
+            clearFeed.addEventListener('click', () => {
+                this.clearFeed();
+            });
+        }
 
         // Chart timeframe controls
         document.querySelectorAll('[data-timeframe]').forEach(btn => {
@@ -49,14 +56,23 @@ class CyberDashboard {
         });
 
         // Attack type filter
-        document.getElementById('attackTypeFilter').addEventListener('change', (e) => {
-            this.filterAttackers(e.target.value);
-        });
+        const attackTypeFilter = document.getElementById('attackTypeFilter');
+        if (attackTypeFilter) {
+            attackTypeFilter.addEventListener('change', (e) => {
+                this.filterAttackers(e.target.value);
+            });
+        }
 
         // Modal close
-        document.querySelector('.close').addEventListener('click', () => {
-            document.getElementById('alertModal').style.display = 'none';
-        });
+        const closeModal = document.querySelector('.close');
+        if (closeModal) {
+            closeModal.addEventListener('click', () => {
+                const modal = document.getElementById('alertModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
 
         window.addEventListener('click', (e) => {
             const modal = document.getElementById('alertModal');
@@ -71,13 +87,15 @@ class CyberDashboard {
         document.body.classList.toggle('attack-mode', enabled);
         
         const threatLevel = document.getElementById('levelValue');
-        if (enabled) {
-            threatLevel.textContent = 'HIGH';
-            threatLevel.className = 'level-value high';
-            this.showAlert('High-intensity attack detected! All systems on high alert.');
-        } else {
-            threatLevel.textContent = 'LOW';
-            threatLevel.className = 'level-value low';
+        if (threatLevel) {
+            if (enabled) {
+                threatLevel.textContent = 'HIGH';
+                threatLevel.className = 'level-value high';
+                this.showAlert('High-intensity attack detected! All systems on high alert.');
+            } else {
+                threatLevel.textContent = 'LOW';
+                threatLevel.className = 'level-value low';
+            }
         }
 
         // Notify threat intelligence system
@@ -86,8 +104,8 @@ class CyberDashboard {
         }
 
         // Notify WebSocket about mode change
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify({
+        if (window.wsManager && window.wsManager.ws && window.wsManager.ws.readyState === WebSocket.OPEN) {
+            window.wsManager.ws.send(JSON.stringify({
                 type: 'attack_mode',
                 enabled: enabled
             }));
@@ -97,20 +115,21 @@ class CyberDashboard {
     toggleFeedPause() {
         this.isPaused = !this.isPaused;
         const btn = document.getElementById('pauseFeed');
-        const icon = btn.querySelector('i');
-        
-        if (this.isPaused) {
-            btn.innerHTML = '<i class="fas fa-play"></i> Resume';
-            icon.className = 'fas fa-play';
-        } else {
-            btn.innerHTML = '<i class="fas fa-pause"></i> Pause';
-            icon.className = 'fas fa-pause';
+        if (btn) {
+            if (this.isPaused) {
+                btn.innerHTML = '<i class="fas fa-play"></i> Resume';
+            } else {
+                btn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+            }
         }
     }
 
     clearFeed() {
         this.feedItems = [];
-        document.getElementById('attackFeed').innerHTML = '';
+        const feedContainer = document.getElementById('attackFeed');
+        if (feedContainer) {
+            feedContainer.innerHTML = '';
+        }
     }
 
     startUptime() {
@@ -120,14 +139,12 @@ class CyberDashboard {
             const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((uptime % (1000 * 60)) / 1000);
             
-            document.getElementById('uptime').textContent = 
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            const uptimeElement = document.getElementById('uptime');
+            if (uptimeElement) {
+                uptimeElement.textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
         }, 1000);
-    }
-
-    initializeWebSocket() {
-        // WebSocket will be initialized in websocket.js
-        // This method can be called from there
     }
 
     loadInitialData() {
@@ -159,16 +176,25 @@ class CyberDashboard {
     updateStats(newStats) {
         if (newStats.activeThreats !== undefined) {
             this.stats.activeThreats = newStats.activeThreats;
-            document.getElementById('activeThreats').textContent = this.stats.activeThreats;
+            const element = document.getElementById('activeThreats');
+            if (element) {
+                element.textContent = this.stats.activeThreats;
+            }
         }
         
         if (newStats.blockedIPs !== undefined) {
             this.stats.blockedIPs = newStats.blockedIPs;
-            document.getElementById('blockedIPs').textContent = this.stats.blockedIPs;
+            const element = document.getElementById('blockedIPs');
+            if (element) {
+                element.textContent = this.stats.blockedIPs;
+            }
         }
         
         if (newStats.countries !== undefined) {
-            document.getElementById('countries').textContent = newStats.countries;
+            const element = document.getElementById('countries');
+            if (element) {
+                element.textContent = newStats.countries;
+            }
         }
     }
 
@@ -176,6 +202,8 @@ class CyberDashboard {
         if (this.isPaused) return;
 
         const feedContainer = document.getElementById('attackFeed');
+        if (!feedContainer) return;
+
         const feedItem = document.createElement('div');
         feedItem.className = `feed-item ${item.risk}-risk`;
         
@@ -238,6 +266,8 @@ class CyberDashboard {
 
     updateAttackersTable() {
         const tbody = document.getElementById('attackersTableBody');
+        if (!tbody) return;
+
         tbody.innerHTML = '';
 
         // Sort attackers by attempts (descending)
@@ -264,6 +294,8 @@ class CyberDashboard {
 
     filterAttackers(type) {
         const tbody = document.getElementById('attackersTableBody');
+        if (!tbody) return;
+
         const rows = tbody.querySelectorAll('tr');
         
         rows.forEach(row => {
@@ -287,6 +319,8 @@ class CyberDashboard {
         const modal = document.getElementById('alertModal');
         const content = document.getElementById('alertContent');
         
+        if (!modal || !content) return;
+
         content.innerHTML = `
             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
                 <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--danger-color);"></i>

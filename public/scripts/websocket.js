@@ -18,7 +18,8 @@ class WebSocketManager {
         try {
             // Use appropriate WebSocket URL based on environment
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.hostname}:3000`;
+            const hostname = window.location.hostname;
+            const wsUrl = `${protocol}//${hostname}:3000`;
             
             this.ws = new WebSocket(wsUrl);
             

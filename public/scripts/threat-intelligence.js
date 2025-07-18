@@ -26,21 +26,32 @@ class ThreatIntelligenceManager {
     }
 
     setupEventListeners() {
-        document.getElementById('generateReport').addEventListener('click', () => {
-            this.generateThreatReport();
-        });
+        const generateBtn = document.getElementById('generateReport');
+        if (generateBtn) {
+            generateBtn.addEventListener('click', () => {
+                this.generateThreatReport();
+            });
+        }
 
-        document.getElementById('exportReport').addEventListener('click', () => {
-            this.exportReport();
-        });
+        const exportBtn = document.getElementById('exportReport');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                this.exportReport();
+            });
+        }
 
-        document.getElementById('analyticsTimeframe').addEventListener('change', (e) => {
-            this.updateAnalyticsTimeframe(e.target.value);
-        });
+        const timeframeSelect = document.getElementById('analyticsTimeframe');
+        if (timeframeSelect) {
+            timeframeSelect.addEventListener('change', (e) => {
+                this.updateAnalyticsTimeframe(e.target.value);
+            });
+        }
     }
 
     generateThreatReport() {
         const reportContainer = document.getElementById('threatReport');
+        if (!reportContainer) return;
+        
         reportContainer.innerHTML = '<div class="report-loading"><i class="fas fa-spinner fa-spin"></i><p>Analyzing global threat landscape...</p></div>';
 
         // Simulate report generation delay
@@ -233,6 +244,7 @@ class ThreatIntelligenceManager {
 
     createAttackVectorChart() {
         const ctx = document.getElementById('attackVectorChart').getContext('2d');
+        if (!ctx) return;
         
         new Chart(ctx, {
             type: 'doughnut',
@@ -271,6 +283,8 @@ class ThreatIntelligenceManager {
 
     createGeoHeatIndex() {
         const container = document.getElementById('geoHeatIndex');
+        if (!container) return;
+        
         const countries = [
             { name: 'Russia', intensity: 95, level: 'high' },
             { name: 'China', intensity: 87, level: 'high' },
@@ -292,6 +306,7 @@ class ThreatIntelligenceManager {
 
     createTemporalChart() {
         const ctx = document.getElementById('temporalChart').getContext('2d');
+        if (!ctx) return;
         
         // Generate 24-hour attack pattern data
         const hours = Array.from({length: 24}, (_, i) => i);
@@ -350,6 +365,8 @@ class ThreatIntelligenceManager {
 
     createRiskMatrix() {
         const container = document.getElementById('riskMatrix');
+        if (!container) return;
+        
         const riskLevels = [
             { label: 'Critical\nInfrastructure', level: 'critical' },
             { label: 'Financial\nServices', level: 'high' },
@@ -381,6 +398,11 @@ class ThreatIntelligenceManager {
 
     exportReport() {
         const reportContent = document.getElementById('threatReport').innerHTML;
+        if (!reportContent) {
+            alert('No report content found.');
+            return;
+        }
+        
         if (!reportContent || reportContent.includes('report-loading')) {
             alert('Please generate a report first before exporting.');
             return;
