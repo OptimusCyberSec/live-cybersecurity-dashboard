@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberWatch - Live Security Dashboard</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS Variables for consistent theming */
         :root {
             --primary-bg: #0a0e1a;
             --secondary-bg: #1a1f2e;
@@ -19,9 +17,6 @@
             --warning-color: #ffa502;
             --success-color: #2ed573;
             --border-color: #3a4553;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            --border-radius: 8px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -35,7 +30,7 @@
             background: linear-gradient(135deg, var(--primary-bg) 0%, #0f1419 100%);
             color: var(--primary-text);
             line-height: 1.6;
-            overflow-x: hidden;
+            min-height: 100vh;
         }
 
         .dashboard-container {
@@ -48,7 +43,6 @@
             background: var(--secondary-bg);
             border-bottom: 2px solid var(--border-color);
             padding: 1rem 2rem;
-            box-shadow: var(--shadow);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -99,7 +93,7 @@
             text-align: center;
             padding: 0.5rem 1rem;
             background: var(--accent-bg);
-            border-radius: var(--border-radius);
+            border-radius: 8px;
             border: 1px solid var(--border-color);
         }
 
@@ -149,7 +143,7 @@
             right: 0;
             bottom: 0;
             background-color: var(--border-color);
-            transition: var(--transition);
+            transition: all 0.3s;
             border-radius: 34px;
         }
 
@@ -161,7 +155,7 @@
             left: 4px;
             bottom: 4px;
             background-color: white;
-            transition: var(--transition);
+            transition: all 0.3s;
             border-radius: 50%;
         }
 
@@ -200,12 +194,12 @@
         .stat-card {
             background: var(--secondary-bg);
             border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
+            border-radius: 8px;
             padding: 1.5rem;
             display: flex;
             align-items: center;
             gap: 1rem;
-            transition: var(--transition);
+            transition: all 0.3s;
             position: relative;
             overflow: hidden;
         }
@@ -222,7 +216,7 @@
 
         .stat-card:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             border-color: var(--accent-color);
         }
 
@@ -245,35 +239,11 @@
             font-weight: 500;
         }
 
-        .chart-section {
-            grid-column: 1 / 8;
-            background: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-        }
-
-        .map-section {
-            grid-column: 8 / -1;
-            background: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-        }
-
         .feed-section {
-            grid-column: 1 / 7;
+            grid-column: 1 / -1;
             background: var(--secondary-bg);
             border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-        }
-
-        .table-section {
-            grid-column: 7 / -1;
-            background: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
+            border-radius: 8px;
             padding: 1.5rem;
         }
 
@@ -297,26 +267,6 @@
 
         .section-header i {
             color: var(--accent-color);
-        }
-
-        .chart-container {
-            height: 300px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--secondary-text);
-        }
-
-        .map-container {
-            height: 300px;
-            border-radius: 4px;
-            overflow: hidden;
-            background: var(--accent-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--secondary-text);
         }
 
         .feed-container {
@@ -372,57 +322,6 @@
             white-space: nowrap;
         }
 
-        .table-container {
-            overflow-x: auto;
-            max-height: 400px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 0.8rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        th {
-            background: var(--accent-bg);
-            font-weight: 600;
-            color: var(--primary-text);
-            position: sticky;
-            top: 0;
-        }
-
-        td {
-            color: var(--secondary-text);
-        }
-
-        .risk-badge {
-            padding: 0.2rem 0.6rem;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .risk-badge.high {
-            background: rgba(255, 71, 87, 0.2);
-            color: var(--danger-color);
-        }
-
-        .risk-badge.medium {
-            background: rgba(255, 165, 2, 0.2);
-            color: var(--warning-color);
-        }
-
-        .risk-badge.low {
-            background: rgba(46, 213, 115, 0.2);
-            color: var(--success-color);
-        }
-
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
@@ -449,28 +348,6 @@
 
         .attack-mode .feed-item.high-risk {
             animation: pulse 0.8s infinite;
-        }
-
-        @media (max-width: 1200px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(8, 1fr);
-            }
-            
-            .chart-section {
-                grid-column: 1 / -1;
-            }
-            
-            .map-section {
-                grid-column: 1 / -1;
-            }
-            
-            .feed-section {
-                grid-column: 1 / -1;
-            }
-            
-            .table-section {
-                grid-column: 1 / -1;
-            }
         }
 
         @media (max-width: 768px) {
@@ -506,8 +383,10 @@
             <div class="header-content">
                 <div class="logo-section">
                     <i class="fas fa-shield-alt"></i>
-                    <h1>CyberWatch</h1>
-                    <span class="subtitle">Live Security Operations Center</span>
+                    <div>
+                        <h1>CyberWatch</h1>
+                        <div class="subtitle">Live Security Operations Center</div>
+                    </div>
                 </div>
                 <div class="status-section">
                     <div class="threat-level" id="threatLevel">
@@ -567,86 +446,20 @@
                 </div>
             </section>
 
-            <!-- Firewall Activity Chart -->
-            <section class="chart-section">
-                <div class="section-header">
-                    <h2><i class="fas fa-chart-line"></i> Firewall Activity</h2>
-                </div>
-                <div class="chart-container">
-                    <i class="fas fa-chart-line" style="font-size: 3rem; opacity: 0.3;"></i>
-                    <p style="margin-left: 1rem;">Real-time firewall monitoring active</p>
-                </div>
-            </section>
-
-            <!-- Geographic Attack Map -->
-            <section class="map-section">
-                <div class="section-header">
-                    <h2><i class="fas fa-map-marked-alt"></i> Global Attack Origins</h2>
-                </div>
-                <div class="map-container">
-                    <i class="fas fa-globe" style="font-size: 3rem; opacity: 0.3;"></i>
-                    <p style="margin-left: 1rem;">Global threat mapping active</p>
-                </div>
-            </section>
-
             <!-- Live Attack Feed -->
             <section class="feed-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-stream"></i> Live Attack Feed</h2>
+                    <h2><i class="fas fa-stream"></i> Live Threat Intelligence Feed</h2>
                 </div>
                 <div class="feed-container" id="attackFeed">
                     <!-- Live feed items will be populated here -->
-                </div>
-            </section>
-
-            <!-- Top Attackers Table -->
-            <section class="table-section">
-                <div class="section-header">
-                    <h2><i class="fas fa-list"></i> Top Attackers</h2>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>IP Address</th>
-                                <th>Country</th>
-                                <th>Attack Type</th>
-                                <th>Attempts</th>
-                                <th>Risk Level</th>
-                            </tr>
-                        </thead>
-                        <tbody id="attackersTableBody">
-                            <tr>
-                                <td><code>192.168.1.100</code></td>
-                                <td>Russia</td>
-                                <td>Brute Force</td>
-                                <td>45</td>
-                                <td><span class="risk-badge high">HIGH</span></td>
-                            </tr>
-                            <tr>
-                                <td><code>10.0.0.50</code></td>
-                                <td>China</td>
-                                <td>DDoS</td>
-                                <td>32</td>
-                                <td><span class="risk-badge medium">MEDIUM</span></td>
-                            </tr>
-                            <tr>
-                                <td><code>172.16.0.25</code></td>
-                                <td>North Korea</td>
-                                <td>Malware</td>
-                                <td>28</td>
-                                <td><span class="risk-badge high">HIGH</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
             </section>
         </main>
     </div>
 
     <script>
-        // Simple Dashboard Controller
-        class SimpleDashboard {
+        class CyberDashboard {
             constructor() {
                 this.isAttackMode = false;
                 this.startTime = Date.now();
@@ -655,10 +468,12 @@
             }
 
             init() {
+                console.log('Dashboard initializing...');
                 this.setupEventListeners();
                 this.startUptime();
                 this.startFeedSimulation();
                 this.addInitialFeedItems();
+                console.log('Dashboard initialized successfully');
             }
 
             setupEventListeners() {
@@ -721,11 +536,12 @@
 
             addInitialFeedItems() {
                 const initialItems = [
-                    { title: 'Brute Force Attack Detected', details: 'Source: 192.168.1.100 (Russia)', risk: 'high', icon: 'fas fa-hammer' },
-                    { title: 'DDoS Attack Blocked', details: 'Source: 10.0.0.50 (China)', risk: 'medium', icon: 'fas fa-bolt' },
-                    { title: 'Malware Detected', details: 'Source: 172.16.0.25 (North Korea)', risk: 'high', icon: 'fas fa-virus' },
-                    { title: 'Port Scan Detected', details: 'Source: 203.0.113.15 (Iran)', risk: 'medium', icon: 'fas fa-search' },
-                    { title: 'SQL Injection Blocked', details: 'Source: 198.51.100.8 (Brazil)', risk: 'low', icon: 'fas fa-database' }
+                    { title: 'Advanced Persistent Threat Detected', details: 'Source: 185.220.101.42 (Russia) - State-sponsored APT group', risk: 'high', icon: 'fas fa-user-secret' },
+                    { title: 'DDoS Attack Mitigated', details: 'Source: 103.224.182.251 (China) - 47.2 Gbps volumetric attack', risk: 'high', icon: 'fas fa-bolt' },
+                    { title: 'Ransomware Payload Blocked', details: 'Source: 91.240.118.172 (North Korea) - Ryuk variant detected', risk: 'high', icon: 'fas fa-virus' },
+                    { title: 'SQL Injection Attempt', details: 'Source: 185.165.29.78 (Iran) - Targeting financial database', risk: 'medium', icon: 'fas fa-database' },
+                    { title: 'Brute Force Campaign', details: 'Source: 177.54.144.206 (Brazil) - SSH credential attacks', risk: 'medium', icon: 'fas fa-hammer' },
+                    { title: 'Malicious Bot Network', details: 'Source: 103.87.24.155 (India) - Cryptocurrency mining botnet', risk: 'low', icon: 'fas fa-robot' }
                 ];
 
                 initialItems.forEach(item => {
@@ -735,7 +551,7 @@
 
             startFeedSimulation() {
                 setInterval(() => {
-                    if (Math.random() < (this.isAttackMode ? 0.8 : 0.3)) {
+                    if (Math.random() < (this.isAttackMode ? 0.9 : 0.4)) {
                         this.simulateAttackEvent();
                     }
                 }, 3000);
@@ -743,28 +559,41 @@
 
             simulateAttackEvent() {
                 const attackTypes = [
-                    { name: 'Brute Force Attack', icon: 'fas fa-hammer' },
-                    { name: 'DDoS Attack', icon: 'fas fa-bolt' },
-                    { name: 'Malware Detection', icon: 'fas fa-virus' },
-                    { name: 'Port Scan', icon: 'fas fa-search' },
-                    { name: 'SQL Injection', icon: 'fas fa-database' }
+                    { name: 'Zero-Day Exploit Detected', icon: 'fas fa-bug', severity: 'high' },
+                    { name: 'Phishing Campaign Identified', icon: 'fas fa-fish', severity: 'medium' },
+                    { name: 'Insider Threat Alert', icon: 'fas fa-user-times', severity: 'high' },
+                    { name: 'Cryptocurrency Mining Detected', icon: 'fas fa-coins', severity: 'low' },
+                    { name: 'Data Exfiltration Attempt', icon: 'fas fa-download', severity: 'high' },
+                    { name: 'Lateral Movement Detected', icon: 'fas fa-route', severity: 'medium' },
+                    { name: 'Command & Control Traffic', icon: 'fas fa-satellite-dish', severity: 'high' },
+                    { name: 'Privilege Escalation Attempt', icon: 'fas fa-user-shield', severity: 'medium' }
                 ];
 
-                const countries = ['Russia', 'China', 'North Korea', 'Iran', 'Brazil', 'India', 'Turkey'];
-                const ips = ['192.168.1.100', '10.0.0.50', '172.16.0.25', '203.0.113.15', '198.51.100.8'];
+                const threatActors = [
+                    { country: 'Russia', group: 'APT28 (Fancy Bear)', ip: '185.220.101' },
+                    { country: 'China', group: 'APT1 (Comment Crew)', ip: '103.224.182' },
+                    { country: 'North Korea', group: 'Lazarus Group', ip: '91.240.118' },
+                    { country: 'Iran', group: 'APT33 (Elfin)', ip: '185.165.29' },
+                    { country: 'Brazil', group: 'Cybercriminal Network', ip: '177.54.144' },
+                    { country: 'India', group: 'Patchwork Group', ip: '103.87.24' },
+                    { country: 'Turkey', group: 'Sea Turtle', ip: '78.186.111' },
+                    { country: 'Vietnam', group: 'APT32 (OceanLotus)', ip: '14.225.192' }
+                ];
 
                 const attack = attackTypes[Math.floor(Math.random() * attackTypes.length)];
-                const country = countries[Math.floor(Math.random() * countries.length)];
-                const ip = ips[Math.floor(Math.random() * ips.length)];
+                const actor = threatActors[Math.floor(Math.random() * threatActors.length)];
                 
-                let risk = ['low', 'medium', 'high'][Math.floor(Math.random() * 3)];
-                if (this.isAttackMode && Math.random() < 0.7) {
+                let risk = attack.severity;
+                if (this.isAttackMode && Math.random() < 0.8) {
                     risk = 'high';
                 }
 
+                const ipSuffix = Math.floor(Math.random() * 255);
+                const fullIP = `${actor.ip}.${ipSuffix}`;
+
                 this.addFeedItem({
-                    title: attack.name + ' Detected',
-                    details: `Source: ${ip} (${country})`,
+                    title: attack.name,
+                    details: `Source: ${fullIP} (${actor.country}) - ${actor.group}`,
                     risk: risk,
                     icon: attack.icon
                 });
@@ -792,16 +621,24 @@
 
                 feedContainer.insertBefore(feedItem, feedContainer.firstChild);
                 
-                // Keep only last 20 items
-                while (feedContainer.children.length > 20) {
+                // Keep only last 25 items
+                while (feedContainer.children.length > 25) {
                     feedContainer.removeChild(feedContainer.lastChild);
+                }
+
+                // Update threat count
+                const activeThreats = document.getElementById('activeThreats');
+                if (activeThreats && item.risk === 'high') {
+                    const current = parseInt(activeThreats.textContent);
+                    activeThreats.textContent = current + 1;
                 }
             }
         }
 
         // Initialize dashboard when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
-            window.dashboard = new SimpleDashboard();
+            console.log('DOM loaded, starting dashboard...');
+            window.dashboard = new CyberDashboard();
         });
     </script>
 </body>
