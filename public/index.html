@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberWatch - Live Security Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <i class="fas fa-shield-alt"></i>
+                    <h1>CyberWatch</h1>
+                    <span class="subtitle">Live Security Operations Center</span>
+                </div>
+                <div class="status-section">
+                    <div class="threat-level" id="threatLevel">
+                        <span class="level-text">THREAT LEVEL</span>
+                        <span class="level-value" id="levelValue">LOW</span>
+                    </div>
+                    <div class="attack-toggle">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="attackMode">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="toggle-label">Under Attack Mode</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="dashboard-grid">
+            <!-- Real-time Stats Cards -->
+            <section class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="activeThreats">0</h3>
+                        <p>Active Threats</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="blockedIPs">0</h3>
+                        <p>Blocked IPs</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="countries">0</h3>
+                        <p>Countries</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 id="uptime">00:00:00</h3>
+                        <p>Uptime</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Firewall Activity Chart -->
+            <section class="chart-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-line"></i> Firewall Activity</h2>
+                    <div class="chart-controls">
+                        <button class="btn-small active" data-timeframe="1h">1H</button>
+                        <button class="btn-small" data-timeframe="6h">6H</button>
+                        <button class="btn-small" data-timeframe="24h">24H</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="firewallChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Geographic Attack Map -->
+            <section class="map-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-map-marked-alt"></i> Global Attack Origins</h2>
+                    <div class="map-legend">
+                        <div class="legend-item">
+                            <span class="legend-dot high"></span>
+                            <span>High Risk</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot medium"></span>
+                            <span>Medium Risk</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot low"></span>
+                            <span>Low Risk</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="attackMap" class="map-container"></div>
+            </section>
+
+            <!-- Live Attack Feed -->
+            <section class="feed-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-stream"></i> Live Attack Feed</h2>
+                    <div class="feed-controls">
+                        <button class="btn-small" id="pauseFeed">
+                            <i class="fas fa-pause"></i> Pause
+                        </button>
+                        <button class="btn-small" id="clearFeed">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                    </div>
+                </div>
+                <div class="feed-container" id="attackFeed">
+                    <!-- Live feed items will be populated here -->
+                </div>
+            </section>
+
+            <!-- Top Attackers Table -->
+            <section class="table-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-list"></i> Top Attackers</h2>
+                    <div class="table-controls">
+                        <select id="attackTypeFilter">
+                            <option value="all">All Types</option>
+                            <option value="brute_force">Brute Force</option>
+                            <option value="ddos">DDoS</option>
+                            <option value="malware">Malware</option>
+                            <option value="sql_injection">SQL Injection</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="attackersTable">
+                        <thead>
+                            <tr>
+                                <th>IP Address</th>
+                                <th>Country</th>
+                                <th>Attack Type</th>
+                                <th>Attempts</th>
+                                <th>Last Seen</th>
+                                <th>Risk Level</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attackersTableBody">
+                            <!-- Table rows will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <!-- Alert Modal -->
+        <div id="alertModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Security Alert</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body" id="alertContent">
+                    <!-- Alert content will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="scripts/dashboard.js"></script>
+    <script src="scripts/map.js"></script>
+    <script src="scripts/charts.js"></script>
+    <script src="scripts/websocket.js"></script>
+</body>
+</html>
