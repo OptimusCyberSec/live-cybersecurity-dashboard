@@ -8,8 +8,20 @@
     "dev": "concurrently \"nodemon server/server.js\" \"npx http-server public -p 3001 -c-1\"",
     "start": "node server/server.js",
     "build": "echo 'Build complete'"
+    "dev": "concurrently \"nodemon server/server.js\" \"npx http-server public -p 3001 -c-1\"",
+    "start": "node server/server.js",
+    "build": "echo 'Build complete'"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.1"
+  }
 }
